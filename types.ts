@@ -2,7 +2,7 @@
 
 export type UUID = string;
 
-export type CategoryKind = 'income' | 'expense';
+export type CategoryKind = "income" | "expense";
 
 export type Category = {
   id: UUID;
@@ -24,7 +24,7 @@ export type Transaction = {
   date: string; // ISO string
   description: string;
   amount: number; // major units (e.g., 12.34)
-  type: 'income' | 'expense';
+  type: "income" | "expense";
   categoryId: UUID;
   walletId: UUID;
 };

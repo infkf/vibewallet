@@ -11,7 +11,12 @@ export const CURRENCIES: Currency[] = [
   { iso: "AFN", name: "Afghan Afghani", symbol: "؋", decimals: 0 },
   { iso: "ALL", name: "Albanian lek", symbol: "L", decimals: 0 },
   { iso: "AMD", name: "Armenian Dram", symbol: "֏", decimals: 0 },
-  { iso: "ANG", name: "Netherlands Antillian Guilder", symbol: "ƒ", decimals: 2 },
+  {
+    iso: "ANG",
+    name: "Netherlands Antillian Guilder",
+    symbol: "ƒ",
+    decimals: 2,
+  },
   { iso: "AOA", name: "Angolan Kwanza", symbol: "Kz", decimals: 2 },
   { iso: "ARS", name: "Argentine Peso", symbol: "$", decimals: 2 },
   { iso: "AUD", name: "Australian Dollar", symbol: "$", decimals: 2 },
@@ -133,7 +138,12 @@ export const CURRENCIES: Currency[] = [
   { iso: "SLL", name: "Sierra Leonean Leone", symbol: "Le", decimals: 0 },
   { iso: "SOS", name: "Somali Shilling", symbol: "Sh", decimals: 0 },
   { iso: "SRD", name: "Surinamese Dollar", symbol: "$", decimals: 2 },
-  { iso: "STD", name: "São Tomé and Príncipe Dobra", symbol: "Db", decimals: 0 },
+  {
+    iso: "STD",
+    name: "São Tomé and Príncipe Dobra",
+    symbol: "Db",
+    decimals: 0,
+  },
   { iso: "SVC", name: "El Salvador Colon US Dollar", symbol: "$", decimals: 2 },
   { iso: "SYP", name: "Syrian Pound", symbol: "ل.س", decimals: 0 },
   { iso: "SZL", name: "Swazi Lilangeni", symbol: "L", decimals: 2 },
@@ -143,7 +153,12 @@ export const CURRENCIES: Currency[] = [
   { iso: "TND", name: "Tunisian Dinar", symbol: "د.ت", decimals: 3 },
   { iso: "TOP", name: "Tongan Pa'anga", symbol: "T$", decimals: 2 },
   { iso: "TRY", name: "Turkish Lira", symbol: "₺", decimals: 2 },
-  { iso: "TTD", name: "Trinidad and Tobago Dollar", symbol: "TT$", decimals: 2 },
+  {
+    iso: "TTD",
+    name: "Trinidad and Tobago Dollar",
+    symbol: "TT$",
+    decimals: 2,
+  },
   { iso: "TWD", name: "New Taiwan Dollar", symbol: "NT$", decimals: 2 },
   { iso: "TZS", name: "Tanzanian Shilling", symbol: "Sh", decimals: 0 },
   { iso: "UAH", name: "Ukrainian Hryvnia", symbol: "₴", decimals: 2 },
@@ -167,7 +182,7 @@ export const CURRENCIES: Currency[] = [
 ];
 
 export function getCurrencyByIso(iso: string): Currency | undefined {
-  return CURRENCIES.find(c => c.iso === iso);
+  return CURRENCIES.find((c) => c.iso === iso);
 }
 
 export function getCurrencySymbol(iso: string): string {

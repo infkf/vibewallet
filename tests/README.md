@@ -25,6 +25,7 @@ vibewallet/
 ## Test Coverage
 
 ### 🧪 Unit Tests (12 tests)
+
 **Location**: `../utils.test.ts`
 
 ✅ UUID generation and validation  
@@ -35,6 +36,7 @@ vibewallet/
 ✅ ISO date string formatting
 
 ### 🔗 Storage Integration (10 tests)
+
 **Location**: `integration/simpleStorage.integration.test.ts`
 
 ✅ Data loading and saving to AsyncStorage  
@@ -49,6 +51,7 @@ vibewallet/
 ✅ Real-world error scenarios
 
 ### 🏗️ Data Flow Integration (12 tests)
+
 **Location**: `integration/dataFlow.integration.test.ts`
 
 ✅ Referential integrity (transactions ↔ categories ↔ wallets)  
@@ -95,25 +98,29 @@ npm test -- --testNamePattern="storage"
 ## Key Features Tested
 
 ### 💾 Data Persistence
+
 - AsyncStorage integration with comprehensive error handling
-- Data corruption detection and recovery mechanisms  
+- Data corruption detection and recovery mechanisms
 - Schema version validation and migration scenarios
 - Performance with large datasets (1000+ transactions)
 - Concurrent operation safety
 
 ### 💼 Business Logic
+
 - Transaction creation, validation, and calculations
 - Category and wallet management with constraints
 - Financial totals, filtering, and date range operations
 - Referential integrity enforcement
 
-### 📥 Import/Export Features  
+### 📥 Import/Export Features
+
 - Money Tracker JSON format parsing and transformation
 - Currency handling and decimal precision
 - Data mapping and validation during import
 - Error handling for malformed import files
 
 ### 🛡️ Error Handling
+
 - Storage access failures and permission issues
 - Invalid data format recovery
 - Missing reference detection and prevention
@@ -124,7 +131,7 @@ npm test -- --testNamePattern="storage"
 Our test suite emphasizes:
 
 1. **🎯 Unit Testing** - Fast, focused tests for pure functions
-2. **🔧 Integration Testing** - Data flow and component interaction  
+2. **🔧 Integration Testing** - Data flow and component interaction
 3. **💰 Business Logic** - Financial calculations and app rules
 4. **🚨 Error Scenarios** - Graceful failure and recovery
 5. **🚀 Performance** - Large dataset and concurrent operations
@@ -134,12 +141,14 @@ Our test suite emphasizes:
 ### Adding New Tests
 
 **For new utility functions:**
+
 ```bash
 # Add tests in the same directory as the source file
 touch newFeature.test.ts  # next to newFeature.ts
 ```
 
 **For integration scenarios:**
+
 ```bash
 # Add to the appropriate integration test file
 # or create new ones in tests/integration/
@@ -163,7 +172,8 @@ touch newFeature.test.ts  # next to newFeature.ts
 ## Contributing
 
 When adding features:
+
 1. Write unit tests for pure functions (co-located)
-2. Add integration tests for complex workflows  
+2. Add integration tests for complex workflows
 3. Update this README if adding new test categories
 4. Ensure all tests pass: `npm test`
