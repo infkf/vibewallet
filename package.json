@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",
@@ -18,13 +19,46 @@
     "react": "19.0.0",
     "react-native": "0.79.5",
     "react-native-paper": "^5.14.5",
+    "react-native-safe-area-context": "^5.6.1",
     "react-native-svg": "15.11.2",
     "react-native-vector-icons": "^10.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.1",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.0.10",
+    "jest": "^30.0.5",
+    "jest-expo": "^53.0.9",
+    "jsdom": "^26.1.0",
+    "ts-jest": "^29.4.1",
     "typescript": "~5.8.3"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "testMatch": [
+      "**/tests/**/*.(ts|tsx|js)",
+      "**/*.(test|spec).(ts|tsx|js)"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/*.d.ts",
+      "!**/node_modules/**",
+      "!**/tests/**"
+    ]
+  }
 }

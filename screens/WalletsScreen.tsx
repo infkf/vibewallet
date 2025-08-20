@@ -4,7 +4,7 @@ import { Alert, ScrollView, View } from 'react-native';
 import { AppData, Wallet } from '../types';
 import { uid } from '../utils';
 import { saveData } from '../storage';
-import { Button, Card, Chip, Dialog, Portal, Text, TextInput } from 'react-native-paper';
+import { Button, Card, Chip, Dialog, IconButton, Portal, Text, TextInput } from 'react-native-paper';
 import { CURRENCIES, getCurrencySymbol } from '../currencies';
 
 interface WalletsScreenProps {
@@ -99,7 +99,7 @@ export default function WalletsScreen({ data, setData, selectedWalletId, onWalle
             <Card.Title 
               title={wallet.name} 
               subtitle={`${wallet.currency} ${symbol} · ${transactionCount} transaction${transactionCount !== 1 ? 's' : ''}`} 
-              right={(props) => <Button {...props} icon="delete" onPress={() => deleteWallet(wallet.id)} />}
+              right={(props) => <IconButton {...props} icon="delete" onPress={() => deleteWallet(wallet.id)} />}
             />
           </Card>
         );
