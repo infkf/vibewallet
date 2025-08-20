@@ -399,7 +399,7 @@ function AddCategoryModal({ visible, kind, onClose, onAdd }:{ visible:boolean; k
 
 export default function App() {
   const [data, setData] = useState<AppData>({ schemaVersion: 1, categories: [], wallets: [], transactions: [] });
-  const [tab, setTab] = useState<'add'|'chart'|'io'>('add');
+  const [tab, setTab] = useState<'add'|'chart'|'transactions'|'io'>('add');
   const [rangeStart, setRangeStart] = useState<Date>(startOfCurrentMonth());
   const [rangeEnd, setRangeEnd] = useState<Date>(endOfCurrentMonth());
 
@@ -494,6 +494,7 @@ export default function App() {
         <View style={{ flexDirection: 'row' }}>
           <TabButton title="Add" active={tab==='add'} onPress={() => setTab('add')} />
           <TabButton title="Chart" active={tab==='chart'} onPress={() => setTab('chart')} />
+          <TabButton title="Transactions" active={tab==='transactions'} onPress={() => setTab('transactions')} />
           <TabButton title="Import/Export" active={tab==='io'} onPress={() => setTab('io')} />
         </View>
         <Text style={{ fontSize: 12, color: '#666' }}>{currency}</Text>
@@ -525,7 +526,9 @@ export default function App() {
           <Button title="Add transaction" onPress={addTransaction} />
 
           <Section title="Recent">
-            {data.transactions.slice(0, 10).map(t => {
+            {data.transactions
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .slice(0, 10).map(t => {
               const cat = data.categories.find(c => c.id === t.categoryId)?.name || '—';
               return (
                 <View key={t.id} style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f1f1f1', flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -586,6 +589,33 @@ export default function App() {
                 </View>
               ))}
             </View>
+          </Section>
+        </ScrollView>
+      )}
+
+      {tab === 'transactions' && (
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <Section title="All Transactions">
+            {data.transactions.length === 0 ? (
+              <Text style={{ color: '#666', textAlign: 'center', paddingVertical: 20 }}>No transactions yet.</Text>
+            ) : (
+              data.transactions
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map(t => {
+                  const cat = data.categories.find(c => c.id === t.categoryId)?.name || '—';
+                  return (
+                    <View key={t.id} style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f1f1', flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontWeight: '600', fontSize: 16 }}>{t.description || cat}</Text>
+                        <Text style={{ color: '#666', fontSize: 14, marginTop: 2 }}>{toISODateString(new Date(t.date))} · {cat}</Text>
+                      </View>
+                      <Text style={{ fontWeight: '700', fontSize: 16, color: t.type==='income' ? '#137333' : '#b00020' }}>
+                        {t.type==='income' ? '+' : '-'}{formatCurrency(t.amount, currency)}
+                      </Text>
+                    </View>
+                  );
+                })
+            )}
           </Section>
         </ScrollView>
       )}
