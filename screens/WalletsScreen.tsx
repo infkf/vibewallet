@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Alert, Button, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { AppData, Wallet } from '../types';
-import { uid, stringToColor } from '../utils';
+import { uid } from '../utils';
 import { saveData } from '../storage';
-import { Section, LabeledInput } from '../components';
+import { Button, Card, Chip, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { CURRENCIES, getCurrencySymbol } from '../currencies';
 
 interface WalletsScreenProps {
@@ -14,7 +14,7 @@ interface WalletsScreenProps {
   onWalletSelect: (walletId: string) => void;
 }
 
-export function WalletsScreen({ data, setData, selectedWalletId, onWalletSelect }: WalletsScreenProps) {
+export default function WalletsScreen({ data, setData, selectedWalletId, onWalletSelect }: WalletsScreenProps) {
   const [showAddWallet, setShowAddWallet] = useState(false);
   const [newWalletName, setNewWalletName] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState('USD');
@@ -87,126 +87,55 @@ export function WalletsScreen({ data, setData, selectedWalletId, onWalletSelect 
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
-      <Section title="Wallets">
-        {data.wallets.length === 0 ? (
-          <Text style={{ color: '#666', textAlign: 'center', paddingVertical: 20 }}>
-            No wallets yet. Create one to get started.
-          </Text>
-        ) : (
-          data.wallets.map(wallet => {
-            const isSelected = wallet.id === selectedWalletId;
-            const transactionCount = data.transactions.filter(t => t.walletId === wallet.id).length;
-            const symbol = getCurrencySymbol(wallet.currency);
-            
-            return (
-              <TouchableOpacity
-                key={wallet.id}
-                onPress={() => onWalletSelect(wallet.id)}
-                style={{
-                  padding: 16,
-                  marginBottom: 8,
-                  borderRadius: 8,
-                  borderWidth: 2,
-                  borderColor: isSelected ? '#007AFF' : '#e1e5e9',
-                  backgroundColor: isSelected ? '#f0f8ff' : '#fff',
-                }}
-              >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 4 }}>
-                      {wallet.name}
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#666' }}>
-                      {wallet.currency} {symbol} • {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
-                    </Text>
-                  </View>
-                  
-                  <TouchableOpacity
-                    onPress={() => deleteWallet(wallet.id)}
-                    style={{
-                      padding: 8,
-                      borderRadius: 4,
-                      backgroundColor: '#ff4444',
-                      marginLeft: 12,
-                    }}
-                  >
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '600' }}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            );
-          })
-        )}
+      <Button mode="contained" onPress={() => setShowAddWallet(true)} style={{ marginBottom: 16 }}>+ Add Wallet</Button>
+
+      {data.wallets.map(wallet => {
+        const isSelected = wallet.id === selectedWalletId;
+        const transactionCount = data.transactions.filter(t => t.walletId === wallet.id).length;
+        const symbol = getCurrencySymbol(wallet.currency);
         
-        <Button title="+ Add Wallet" onPress={() => setShowAddWallet(true)} />
-      </Section>
+        return (
+          <Card key={wallet.id} onPress={() => onWalletSelect(wallet.id)} style={{ marginBottom: 8, borderColor: isSelected ? 'blue' : 'transparent', borderWidth: 2 }}>
+            <Card.Title 
+              title={wallet.name} 
+              subtitle={`${wallet.currency} ${symbol} · ${transactionCount} transaction${transactionCount !== 1 ? 's' : ''}`} 
+              right={(props) => <Button {...props} icon="delete" onPress={() => deleteWallet(wallet.id)} />}
+            />
+          </Card>
+        );
+      })}
 
-      {showAddWallet && (
-        <Section title="Add New Wallet">
-          <LabeledInput
-            label="Wallet Name"
-            value={newWalletName}
-            onChangeText={setNewWalletName}
-            placeholder="e.g., Main Wallet"
-          />
-          
-          <Text style={{ fontSize: 14, fontWeight: '600', marginBottom: 8, marginTop: 16 }}>Currency</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {CURRENCIES.slice(0, 20).map(currency => ( // Show first 20 popular currencies
-                <TouchableOpacity
-                  key={currency.iso}
-                  onPress={() => setSelectedCurrency(currency.iso)}
-                  style={{
-                    padding: 12,
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    borderColor: selectedCurrency === currency.iso ? '#007AFF' : '#ccc',
-                    backgroundColor: selectedCurrency === currency.iso ? '#f0f8ff' : '#fff',
-                    minWidth: 80,
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text style={{ fontSize: 16, fontWeight: '600' }}>{currency.symbol}</Text>
-                  <Text style={{ fontSize: 12, color: '#666' }}>{currency.iso}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
-
-          <Text style={{ fontSize: 12, color: '#666', marginBottom: 16 }}>
-            Selected: {CURRENCIES.find(c => c.iso === selectedCurrency)?.name || selectedCurrency}
-          </Text>
-
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <TouchableOpacity
-              onPress={() => setShowAddWallet(false)}
-              style={{
-                flex: 1,
-                padding: 12,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: '#ccc',
-                alignItems: 'center',
-              }}
-            >
-              <Text>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={addWallet}
-              style={{
-                flex: 1,
-                padding: 12,
-                borderRadius: 8,
-                backgroundColor: '#007AFF',
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: '#fff', fontWeight: '600' }}>Add Wallet</Text>
-            </TouchableOpacity>
-          </View>
-        </Section>
-      )}
+      <Portal>
+        <Dialog visible={showAddWallet} onDismiss={() => setShowAddWallet(false)}>
+          <Dialog.Title>Add New Wallet</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              label="Wallet Name"
+              value={newWalletName}
+              onChangeText={setNewWalletName}
+              placeholder="e.g., Main Wallet"
+              style={{ marginBottom: 16 }}
+            />
+            <Text style={{ marginBottom: 8 }}>Currency</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                {CURRENCIES.slice(0, 20).map(currency => (
+                  <Chip 
+                    key={currency.iso} 
+                    selected={selectedCurrency === currency.iso} 
+                    onPress={() => setSelectedCurrency(currency.iso)}>
+                    {currency.iso}
+                  </Chip>
+                ))}
+              </View>
+            </ScrollView>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowAddWallet(false)}>Cancel</Button>
+            <Button onPress={addWallet}>Add</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </ScrollView>
   );
 }

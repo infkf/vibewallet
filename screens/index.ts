@@ -1,5 +1,6 @@
-export { AddScreen } from './AddScreen';
-export { ChartScreen } from './ChartScreen';
-export { TransactionsScreen } from './TransactionsScreen';
-export { ImportExportScreen } from './ImportExportScreen';
-export { WalletsScreen } from './WalletsScreen';
+export { default as AddScreen } from './AddScreen';
+export { default as ChartScreen } from './ChartScreen';
+export { default as TransactionsScreen } from './TransactionsScreen';
+export { default as ImportExportScreen } from './ImportExportScreen';
+export { default as WalletsScreen } from './WalletsScreen';
+export { default as Main } from './Main';
