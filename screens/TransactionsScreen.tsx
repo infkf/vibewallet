@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { Card, DataTable, Text } from 'react-native-paper';
 import { AppData } from '../types';
-import { formatCurrency, formatCurrencyWithSymbol, toISODateString, stringToColor } from '../utils';
-import { Section } from '../components';
+import { formatCurrencyWithSymbol, toISODateString, stringToColor } from '../utils';
 import { getCurrencySymbol } from '../currencies';
 
 interface TransactionsScreenProps {
@@ -10,42 +10,53 @@ interface TransactionsScreenProps {
   currency: string;
 }
 
-export function TransactionsScreen({ data, currency }: TransactionsScreenProps) {
+export default function TransactionsScreen({ data, currency }: TransactionsScreenProps) {
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
-      <Section title="All Transactions">
-        {data.transactions.length === 0 ? (
-          <Text style={{ color: '#666', textAlign: 'center', paddingVertical: 20 }}>No transactions yet.</Text>
-        ) : (
-          data.transactions
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .map(t => {
-              const category = data.categories.find(c => c.id === t.categoryId);
-              const wallet = data.wallets.find(w => w.id === t.walletId);
-              const catName = category?.name || '—';
-              const catColor = category?.color || stringToColor(catName);
-              const walletSymbol = wallet ? getCurrencySymbol(wallet.currency) : '$';
-              const walletDecimals = wallet?.decimals || 2;
-              return (
-                <View key={t.id} style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f1f1', flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: catColor }} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ fontWeight: '600', fontSize: 16 }}>{t.description || catName}</Text>
-                      <Text style={{ color: '#666', fontSize: 14, marginTop: 2 }}>
-                        {toISODateString(new Date(t.date))} · {catName}
-                        {wallet && wallet.name && <Text> · {wallet.name}</Text>}
+      <Card>
+        <Card.Title title="All Transactions" />
+        <DataTable>
+          <DataTable.Header>
+            <DataTable.Title>Transaction</DataTable.Title>
+            <DataTable.Title numeric>Amount</DataTable.Title>
+          </DataTable.Header>
+          {data.transactions.length === 0 ? (
+            <Text style={{ textAlign: 'center', padding: 16 }}>No transactions yet.</Text>
+          ) : (
+            data.transactions
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .map(t => {
+                const category = data.categories.find(c => c.id === t.categoryId);
+                const wallet = data.wallets.find(w => w.id === t.walletId);
+                const catName = category?.name || '—';
+                const catColor = category?.color || stringToColor(catName);
+                const walletSymbol = wallet ? getCurrencySymbol(wallet.currency) : '$';
+                const walletDecimals = wallet?.decimals || 2;
+                return (
+                  <DataTable.Row key={t.id}>
+                    <DataTable.Cell>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: catColor }} />
+                        <View>
+                          <Text variant='labelLarge'>{t.description || catName}</Text>
+                          <Text variant='bodySmall'>
+                            {toISODateString(new Date(t.date))} · {catName}
+                            {wallet && wallet.name && <Text> · {wallet.name}</Text>}
+                          </Text>
+                        </View>
+                      </View>
+                    </DataTable.Cell>
+                    <DataTable.Cell numeric>
+                      <Text style={{ color: t.type === 'income' ? 'green' : 'red' }}>
+                        {t.type === 'income' ? '+' : '-'}{formatCurrencyWithSymbol(t.amount, walletSymbol, walletDecimals)}
                       </Text>
-                    </View>
-                  </View>
-                  <Text style={{ fontWeight: '700', fontSize: 16, color: t.type === 'income' ? '#137333' : '#b00020' }}>
-                    {t.type === 'income' ? '+' : '-'}{formatCurrencyWithSymbol(t.amount, walletSymbol, walletDecimals)}
-                  </Text>
-                </View>
-              );
-            })
-        )}
-      </Section>
+                    </DataTable.Cell>
+                  </DataTable.Row>
+                );
+              })
+          )}
+        </DataTable>
+      </Card>
     </ScrollView>
   );
 }

@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { useMemo } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { Card, DataTable, Text } from 'react-native-paper';
 import { AppData } from '../types';
 import { formatCurrency, stringToColor } from '../utils';
-import { Section, MonthNavigator } from '../components';
+import { MonthNavigator } from '../components';
 import { PieChart, PieDatum } from '../components/PieChart';
 
 interface ChartScreenProps {
@@ -14,7 +15,7 @@ interface ChartScreenProps {
   onRangeChange: (start: Date, end: Date) => void;
 }
 
-export function ChartScreen({ data, currency, rangeStart, rangeEnd, onRangeChange }: ChartScreenProps) {
+export default function ChartScreen({ data, currency, rangeStart, rangeEnd, onRangeChange }: ChartScreenProps) {
   const transactionsInRange = useMemo(() => {
     const s = rangeStart.getTime();
     const e = rangeEnd.getTime();
@@ -49,47 +50,62 @@ export function ChartScreen({ data, currency, rangeStart, rangeEnd, onRangeChang
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
-      <Section title="Date range">
-        <MonthNavigator start={rangeStart} end={rangeEnd} onChange={onRangeChange} />
-      </Section>
-      <Section title="Totals">
-        <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 12 }}>
-          <View>
-            <Text style={{ color: '#666' }}>Income</Text>
-            <Text style={{ fontWeight: '700' }}>{formatCurrency(totals.income, currency)}</Text>
-          </View>
-          <View>
-            <Text style={{ color: '#666' }}>Expense</Text>
-            <Text style={{ fontWeight: '700' }}>{formatCurrency(totals.expense, currency)}</Text>
-          </View>
-          <View>
-            <Text style={{ color: '#666' }}>Net</Text>
-            <Text style={{ fontWeight: '700' }}>{formatCurrency(totals.net, currency)}</Text>
-          </View>
-        </View>
-      </Section>
+      <Card style={{ marginBottom: 16 }}>
+        <Card.Title title="Date Range" />
+        <Card.Content>
+          <MonthNavigator start={rangeStart} end={rangeEnd} onChange={onRangeChange} />
+        </Card.Content>
+      </Card>
 
-      <Section title="Spending by category">
-        {expenseByCategory.length === 0 ? (
-          <Text style={{ color: '#666' }}>No expenses in selected range.</Text>
-        ) : (
-          <View style={{ alignItems: 'center' }}>
-            <PieChart data={expenseByCategory} size={240} />
-          </View>
-        )}
-
-        <View style={{ marginTop: 12 }}>
-          {expenseByCategory.map(d => (
-            <View key={d.key} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#f1f1f1' }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: d.color }} />
-                <Text>{d.label}</Text>
-              </View>
-              <Text style={{ fontWeight: '700' }}>{formatCurrency(d.value, currency)}</Text>
+      <Card style={{ marginBottom: 16 }}>
+        <Card.Title title="Totals" />
+        <Card.Content>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+            <View style={{ alignItems: 'center' }}>
+              <Text>Income</Text>
+              <Text variant="headlineSmall">{formatCurrency(totals.income, currency)}</Text>
             </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text>Expense</Text>
+              <Text variant="headlineSmall">{formatCurrency(totals.expense, currency)}</Text>
+            </View>
+            <View style={{ alignItems: 'center' }}>
+              <Text>Net</Text>
+              <Text variant="headlineSmall">{formatCurrency(totals.net, currency)}</Text>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+
+      <Card>
+        <Card.Title title="Spending by Category" />
+        <Card.Content>
+          {expenseByCategory.length === 0 ? (
+            <Text style={{ textAlign: 'center', padding: 16 }}>No expenses in selected range.</Text>
+          ) : (
+            <View style={{ alignItems: 'center' }}>
+              <PieChart data={expenseByCategory} size={240} />
+            </View>
+          )}
+        </Card.Content>
+        <DataTable>
+          <DataTable.Header>
+            <DataTable.Title>Category</DataTable.Title>
+            <DataTable.Title numeric>Amount</DataTable.Title>
+          </DataTable.Header>
+          {expenseByCategory.map(d => (
+            <DataTable.Row key={d.key}>
+              <DataTable.Cell>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: d.color }} />
+                  <Text>{d.label}</Text>
+                </View>
+              </DataTable.Cell>
+              <DataTable.Cell numeric>{formatCurrency(d.value, currency)}</DataTable.Cell>
+            </DataTable.Row>
           ))}
-        </View>
-      </Section>
+        </DataTable>
+      </Card>
     </ScrollView>
   );
 }
