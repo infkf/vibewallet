@@ -9,6 +9,7 @@ import AddScreen from "./AddScreen";
 import ChartScreen from "./ChartScreen";
 import TransactionsScreen from "./TransactionsScreen";
 import WalletsScreen from "./WalletsScreen";
+import CategoriesScreen from "./CategoriesScreen";
 import ImportExportScreen from "./ImportExportScreen";
 
 const Main = () => {
@@ -77,6 +78,12 @@ const Main = () => {
       unfocusedIcon: "format-list-bulleted",
     },
     {
+      key: "categories",
+      title: "Categories",
+      focusedIcon: "tag",
+      unfocusedIcon: "tag-outline",
+    },
+    {
       key: "wallets",
       title: "Wallets",
       focusedIcon: "wallet",
@@ -112,7 +119,15 @@ const Main = () => {
           />
         );
       case "transactions":
-        return <TransactionsScreen data={data} currency={currency} />;
+        return (
+          <TransactionsScreen
+            data={data}
+            setData={setData}
+            currency={currency}
+          />
+        );
+      case "categories":
+        return <CategoriesScreen data={data} setData={setData} />;
       case "wallets":
         return (
           <WalletsScreen

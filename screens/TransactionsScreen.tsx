@@ -1,7 +1,8 @@
 import * as React from "react";
-import { ScrollView, View } from "react-native";
-import { Card, DataTable, Text } from "react-native-paper";
+import { ScrollView, View, Alert } from "react-native";
+import { Card, DataTable, Text, IconButton } from "react-native-paper";
 import { AppData } from "../types";
+import { saveData } from "../storage";
 import {
   formatCurrencyWithSymbol,
   toISODateString,
@@ -11,10 +12,37 @@ import { getCurrencySymbol } from "../currencies";
 
 interface TransactionsScreenProps {
   data: AppData;
+  setData: (data: AppData) => void;
   currency: string;
 }
 
-export default function TransactionsScreen({ data }: TransactionsScreenProps) {
+export default function TransactionsScreen({
+  data,
+  setData,
+}: TransactionsScreenProps) {
+  const deleteTransaction = async (transactionId: string) => {
+    Alert.alert(
+      "Delete Transaction",
+      "Are you sure you want to delete this transaction?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const next = {
+              ...data,
+              transactions: data.transactions.filter(
+                (t) => t.id !== transactionId,
+              ),
+            };
+            setData(next);
+            await saveData(next);
+          },
+        },
+      ],
+    );
+  };
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <Card>
@@ -23,6 +51,9 @@ export default function TransactionsScreen({ data }: TransactionsScreenProps) {
           <DataTable.Header>
             <DataTable.Title>Transaction</DataTable.Title>
             <DataTable.Title numeric>Amount</DataTable.Title>
+            <DataTable.Title numeric style={{ width: 60 }}>
+              Action
+            </DataTable.Title>
           </DataTable.Header>
           {data.transactions.length === 0 ? (
             <Text
@@ -95,6 +126,13 @@ export default function TransactionsScreen({ data }: TransactionsScreenProps) {
                           walletDecimals,
                         )}
                       </Text>
+                    </DataTable.Cell>
+                    <DataTable.Cell numeric style={{ width: 60 }}>
+                      <IconButton
+                        icon="delete"
+                        size={20}
+                        onPress={() => deleteTransaction(t.id)}
+                      />
                     </DataTable.Cell>
                   </DataTable.Row>
                 );

@@ -35,4 +35,8 @@ export type AppData = {
   categories: Category[];
   wallets: Wallet[];
   transactions: Transaction[];
+  lastUsedCategories?: {
+    income?: string; // categoryId
+    expense?: string; // categoryId
+  };
 };

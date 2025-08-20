@@ -1,13 +1,12 @@
 import * as React from "react";
 import { useState } from "react";
-import { Alert, ScrollView, View } from "react-native";
+import { Alert, ScrollView } from "react-native";
 import { AppData, Wallet } from "../types";
 import { uid } from "../utils";
 import { saveData } from "../storage";
 import {
   Button,
   Card,
-  Chip,
   Dialog,
   IconButton,
   Portal,
@@ -15,6 +14,7 @@ import {
   TextInput,
 } from "react-native-paper";
 import { CURRENCIES, getCurrencySymbol } from "../currencies";
+import { CurrencyDropdown } from "../components";
 
 interface WalletsScreenProps {
   data: AppData;
@@ -161,23 +161,10 @@ export default function WalletsScreen({
             <Text variant="labelMedium" style={{ marginBottom: 8 }}>
               Currency
             </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={{ marginBottom: 16 }}
-            >
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                {CURRENCIES.slice(0, 20).map((currency) => (
-                  <Chip
-                    key={currency.iso}
-                    selected={selectedCurrency === currency.iso}
-                    onPress={() => setSelectedCurrency(currency.iso)}
-                  >
-                    {currency.iso}
-                  </Chip>
-                ))}
-              </View>
-            </ScrollView>
+            <CurrencyDropdown
+              value={selectedCurrency}
+              onChange={setSelectedCurrency}
+            />
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={() => setShowAddWallet(false)}>Cancel</Button>

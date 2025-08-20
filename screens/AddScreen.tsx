@@ -1,7 +1,7 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Alert, ScrollView, View } from "react-native";
-import { Button, Card, Chip, Text, TextInput } from "react-native-paper";
+import { Button, Card, Text, TextInput } from "react-native-paper";
 import { AppData, Category, Transaction } from "../types";
 import {
   formatCurrencyWithSymbol,
@@ -10,7 +10,11 @@ import {
   stringToColor,
 } from "../utils";
 import { saveData } from "../storage";
-import { CategorySelector, AddCategoryModal } from "../components";
+import {
+  CategorySelector,
+  AddCategoryModal,
+  TransactionTypeSelector,
+} from "../components";
 import { getCurrencySymbol } from "../currencies";
 
 interface AddScreenProps {
@@ -29,8 +33,28 @@ export default function AddScreen({
   const [amount, setAmount] = useState("");
   const [desc, setDesc] = useState("");
   const [type, setType] = useState<"income" | "expense">("expense");
-  const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
+  const [categoryId, setCategoryId] = useState<string | undefined>(
+    data.lastUsedCategories?.[type],
+  );
   const [showAddCategory, setShowAddCategory] = useState(false);
+
+  // Update category selection when type changes
+  useEffect(() => {
+    const lastUsedCategory = data.lastUsedCategories?.[type];
+    if (lastUsedCategory) {
+      // Check if the category still exists and matches the current type
+      const category = data.categories.find(
+        (c) => c.id === lastUsedCategory && c.kind === type,
+      );
+      if (category) {
+        setCategoryId(lastUsedCategory);
+      } else {
+        setCategoryId(undefined);
+      }
+    } else {
+      setCategoryId(undefined);
+    }
+  }, [type, data.categories, data.lastUsedCategories]);
 
   const addCategory = async (name: string, color: string) => {
     const c: Category = { id: uid(), name, kind: type, color };
@@ -60,12 +84,23 @@ export default function AddScreen({
       categoryId,
       walletId,
     };
-    const next = { ...data, transactions: [tx, ...data.transactions] };
+
+    // Update last used categories
+    const lastUsedCategories = {
+      ...data.lastUsedCategories,
+      [type]: categoryId,
+    };
+
+    const next = {
+      ...data,
+      transactions: [tx, ...data.transactions],
+      lastUsedCategories,
+    };
     setData(next);
     await saveData(next);
     setAmount("");
     setDesc("");
-    setCategoryId(undefined);
+    // Keep the same category selected for next transaction
   };
 
   return (
@@ -73,20 +108,7 @@ export default function AddScreen({
       <Card style={{ marginBottom: 16 }}>
         <Card.Title title="New Transaction" />
         <Card.Content>
-          <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
-            <Chip
-              selected={type === "expense"}
-              onPress={() => setType("expense")}
-            >
-              Expense
-            </Chip>
-            <Chip
-              selected={type === "income"}
-              onPress={() => setType("income")}
-            >
-              Income
-            </Chip>
-          </View>
+          <TransactionTypeSelector value={type} onChange={setType} />
           <TextInput
             label="Amount"
             value={amount}

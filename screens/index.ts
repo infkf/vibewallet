@@ -3,4 +3,5 @@ export { default as ChartScreen } from "./ChartScreen";
 export { default as TransactionsScreen } from "./TransactionsScreen";
 export { default as ImportExportScreen } from "./ImportExportScreen";
 export { default as WalletsScreen } from "./WalletsScreen";
+export { default as CategoriesScreen } from "./CategoriesScreen";
 export { default as Main } from "./Main";
