@@ -27,6 +27,10 @@ export function formatCurrency(n: number, currency = 'USD') {
   }
 }
 
+export function formatCurrencyWithSymbol(n: number, symbol: string, decimals: number = 2) {
+  return `${symbol}${n.toFixed(decimals)}`;
+}
+
 export function toISODateString(d: Date) {
   const pad = (n: number) => n.toString().padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;

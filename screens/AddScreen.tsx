@@ -2,17 +2,19 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Alert, Button, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { AppData, Category, Transaction } from '../types';
-import { formatCurrency, toISODateString, uid, stringToColor } from '../utils';
+import { formatCurrency, formatCurrencyWithSymbol, toISODateString, uid, stringToColor } from '../utils';
 import { saveData } from '../storage';
 import { Section, LabeledInput, CategorySelector, AddCategoryModal } from '../components';
+import { getCurrencySymbol } from '../currencies';
 
 interface AddScreenProps {
   data: AppData;
   setData: (data: AppData) => void;
   currency: string;
+  selectedWalletId: string | undefined;
 }
 
-export function AddScreen({ data, setData, currency }: AddScreenProps) {
+export function AddScreen({ data, setData, currency, selectedWalletId }: AddScreenProps) {
   // Add form
   const [amount, setAmount] = useState('');
   const [desc, setDesc] = useState('');
@@ -31,7 +33,8 @@ export function AddScreen({ data, setData, currency }: AddScreenProps) {
   const addTransaction = async () => {
     const amt = parseFloat(amount);
     if (!amt || !categoryId) { Alert.alert('Missing info', 'Enter amount and choose a category.'); return; }
-    const walletId = data.wallets[0]?.id || 'default-wallet';
+    if (!selectedWalletId) { Alert.alert('No wallet selected', 'Please select a wallet first.'); return; }
+    const walletId = selectedWalletId;
     const tx: Transaction = {
       id: uid(),
       date: new Date().toISOString(),
@@ -77,8 +80,11 @@ export function AddScreen({ data, setData, currency }: AddScreenProps) {
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 10).map(t => {
           const category = data.categories.find(c => c.id === t.categoryId);
+          const wallet = data.wallets.find(w => w.id === t.walletId);
           const catName = category?.name || '—';
           const catColor = category?.color || stringToColor(catName);
+          const walletSymbol = wallet ? getCurrencySymbol(wallet.currency) : '$';
+          const walletDecimals = wallet?.decimals || 2;
           return (
             <View key={t.id} style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f1f1f1', flexDirection: 'row', justifyContent: 'space-between' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
@@ -88,7 +94,7 @@ export function AddScreen({ data, setData, currency }: AddScreenProps) {
                   <Text style={{ color: '#666', fontSize: 12 }}>{toISODateString(new Date(t.date))} · {catName}</Text>
                 </View>
               </View>
-              <Text style={{ fontWeight: '700', color: t.type === 'income' ? '#137333' : '#b00020' }}>{t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currency)}</Text>
+              <Text style={{ fontWeight: '700', color: t.type === 'income' ? '#137333' : '#b00020' }}>{t.type === 'income' ? '+' : '-'}{formatCurrencyWithSymbol(t.amount, walletSymbol, walletDecimals)}</Text>
             </View>
           );
         })}

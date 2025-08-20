@@ -26,26 +26,46 @@ import { useEffect, useState } from 'react';
 import { SafeAreaView, Text, View } from 'react-native';
 import { AppData } from './types';
 import { startOfCurrentMonth, endOfCurrentMonth } from './utils';
-import { loadData } from './storage';
+import { loadData, saveData } from './storage';
 import { TabButton } from './components';
-import { AddScreen, ChartScreen, TransactionsScreen, ImportExportScreen } from './screens';
+import { AddScreen, ChartScreen, TransactionsScreen, ImportExportScreen, WalletsScreen } from './screens';
+import { getCurrencySymbol } from './currencies';
 
 // ---------- Main App ----------
 
 export default function App() {
   const [data, setData] = useState<AppData>({ schemaVersion: 1, categories: [], wallets: [], transactions: [] });
-  const [tab, setTab] = useState<'add'|'chart'|'transactions'|'io'>('add');
+  const [tab, setTab] = useState<'add'|'chart'|'transactions'|'wallets'|'io'>('add');
   const [rangeStart, setRangeStart] = useState<Date>(startOfCurrentMonth());
   const [rangeEnd, setRangeEnd] = useState<Date>(endOfCurrentMonth());
+  const [selectedWalletId, setSelectedWalletId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
       const d = await loadData();
+      
+      // Create default wallet if none exists
+      if (d.wallets.length === 0) {
+        const defaultWallet = {
+          id: 'main-wallet-' + Date.now(),
+          name: 'Main Wallet',
+          currency: 'USD',
+          decimals: 2,
+        };
+        d.wallets = [defaultWallet];
+        setSelectedWalletId(defaultWallet.id);
+        await saveData(d);
+      } else {
+        setSelectedWalletId(d.wallets[0].id);
+      }
+      
       setData(d);
     })();
   }, []);
 
-  const currency = data.wallets[0]?.currency || 'USD';
+  const selectedWallet = data.wallets.find(w => w.id === selectedWalletId) || data.wallets[0];
+  const currency = selectedWallet?.currency || 'USD';
+  const currencySymbol = selectedWallet ? getCurrencySymbol(selectedWallet.currency) : '$';
 
   const handleRangeChange = (start: Date, end: Date) => {
     setRangeStart(start);
@@ -59,13 +79,17 @@ export default function App() {
           <TabButton title="Add" active={tab==='add'} onPress={() => setTab('add')} />
           <TabButton title="Chart" active={tab==='chart'} onPress={() => setTab('chart')} />
           <TabButton title="Transactions" active={tab==='transactions'} onPress={() => setTab('transactions')} />
+          <TabButton title="Wallets" active={tab==='wallets'} onPress={() => setTab('wallets')} />
           <TabButton title="Import/Export" active={tab==='io'} onPress={() => setTab('io')} />
         </View>
-        <Text style={{ fontSize: 12, color: '#666' }}>{currency}</Text>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text style={{ fontSize: 12, color: '#666' }}>{selectedWallet?.name || 'No wallet'}</Text>
+          <Text style={{ fontSize: 10, color: '#999' }}>{currency} {currencySymbol}</Text>
+        </View>
       </View>
 
       {tab === 'add' && (
-        <AddScreen data={data} setData={setData} currency={currency} />
+        <AddScreen data={data} setData={setData} currency={currency} selectedWalletId={selectedWalletId} />
       )}
 
       {tab === 'chart' && (
@@ -74,6 +98,10 @@ export default function App() {
 
       {tab === 'transactions' && (
         <TransactionsScreen data={data} currency={currency} />
+      )}
+
+      {tab === 'wallets' && (
+        <WalletsScreen data={data} setData={setData} selectedWalletId={selectedWalletId} onWalletSelect={setSelectedWalletId} />
       )}
 
       {tab === 'io' && (

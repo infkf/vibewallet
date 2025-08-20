@@ -24,7 +24,7 @@ export function ImportExportScreen({ data, setData }: ImportExportScreenProps) {
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <Section title="Import">
         <Text style={{ marginBottom: 8 }}>Import from Money Tracker JSON (e.g., extracted database.json) or this app's own export.</Text>
-        <Button title="Pick JSON file" onPress={() => pickAndImport(setData)} />
+        <Button title="Pick JSON file" onPress={() => pickAndImport(setData, data)} />
       </Section>
       <Section title="Export">
         <Text style={{ marginBottom: 8 }}>Export current data as JSON.</Text>

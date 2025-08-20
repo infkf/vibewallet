@@ -121,7 +121,7 @@ function mapMoneyTrackerToApp(json: MoneyTrackerJSON): AppData {
   };
 }
 
-export async function pickAndImport(setData: (d: AppData) => void) {
+export async function pickAndImport(setData: (d: AppData) => void, currentData: AppData) {
   try {
     const res = await DocumentPicker.getDocumentAsync({ type: 'application/json' });
     if (res.canceled || !res.assets?.length) return;
@@ -129,28 +129,95 @@ export async function pickAndImport(setData: (d: AppData) => void) {
     const contents = await FileSystem.readAsStringAsync(file.uri);
     const json = JSON.parse(contents);
 
-    let newData: AppData | null = null;
+    let importedData: AppData | null = null;
     if (detectMoneyTracker(json)) {
-      newData = mapMoneyTrackerToApp(json);
+      importedData = mapMoneyTrackerToApp(json);
     } else if (json && json.schemaVersion === 1 && Array.isArray(json.transactions)) {
-      newData = json as AppData;
+      importedData = json as AppData;
     } else if (json && json.databases) {
       // Support importing database.json extracted from .mwbx
       const db = json.databases ? json : json; // already is database.json root
-      if (detectMoneyTracker(db)) newData = mapMoneyTrackerToApp(db);
+      if (detectMoneyTracker(db)) importedData = mapMoneyTrackerToApp(db);
     }
 
-    if (!newData) {
+    if (!importedData) {
       Alert.alert('Import failed', 'Unrecognized JSON format.');
       return;
     }
 
-    await saveData(newData);
-    setData(newData);
-    Alert.alert('Import done', `Imported ${newData.transactions.length} transactions, ${newData.categories.length} categories.`);
+    // Merge with existing data, matching wallets by name
+    const mergedData = mergeImportedData(currentData, importedData);
+
+    await saveData(mergedData);
+    setData(mergedData);
+    Alert.alert('Import done', `Imported ${importedData.transactions.length} transactions, ${importedData.categories.length} categories, ${importedData.wallets.length} wallets.`);
   } catch (e: any) {
     Alert.alert('Import error', e?.message ?? String(e));
   }
+}
+
+function mergeImportedData(currentData: AppData, importedData: AppData): AppData {
+  // Create maps for efficient lookup
+  const existingWalletsByName = new Map(currentData.wallets.map(w => [w.name.toLowerCase(), w]));
+  const existingCategoriesByName = new Map(currentData.categories.map(c => [c.name.toLowerCase(), c]));
+  
+  // Merge wallets - match by name, add new ones
+  const mergedWallets = [...currentData.wallets];
+  const walletIdMapping = new Map<string, string>(); // old ID -> new ID
+  
+  for (const importedWallet of importedData.wallets) {
+    const existingWallet = existingWalletsByName.get(importedWallet.name.toLowerCase());
+    if (existingWallet) {
+      // Wallet with same name exists, map the imported wallet ID to existing wallet ID
+      walletIdMapping.set(importedWallet.id, existingWallet.id);
+    } else {
+      // New wallet, add it with a new ID to avoid conflicts
+      const newWallet = { ...importedWallet, id: uid() };
+      mergedWallets.push(newWallet);
+      walletIdMapping.set(importedWallet.id, newWallet.id);
+    }
+  }
+  
+  // Merge categories - match by name and kind, add new ones
+  const mergedCategories = [...currentData.categories];
+  const categoryIdMapping = new Map<string, string>(); // old ID -> new ID
+  
+  for (const importedCategory of importedData.categories) {
+    const existingCategory = existingCategoriesByName.get(importedCategory.name.toLowerCase());
+    if (existingCategory && existingCategory.kind === importedCategory.kind) {
+      // Category with same name and kind exists, map the imported category ID to existing category ID
+      categoryIdMapping.set(importedCategory.id, existingCategory.id);
+    } else {
+      // New category, add it with a new ID to avoid conflicts
+      const newCategory = { ...importedCategory, id: uid() };
+      mergedCategories.push(newCategory);
+      categoryIdMapping.set(importedCategory.id, newCategory.id);
+    }
+  }
+  
+  // Add transactions with updated wallet and category IDs
+  const mergedTransactions = [...currentData.transactions];
+  for (const importedTransaction of importedData.transactions) {
+    const newWalletId = walletIdMapping.get(importedTransaction.walletId);
+    const newCategoryId = categoryIdMapping.get(importedTransaction.categoryId);
+    
+    if (newWalletId && newCategoryId) {
+      const newTransaction = {
+        ...importedTransaction,
+        id: uid(), // Generate new ID to avoid conflicts
+        walletId: newWalletId,
+        categoryId: newCategoryId,
+      };
+      mergedTransactions.push(newTransaction);
+    }
+  }
+  
+  return {
+    ...currentData,
+    wallets: mergedWallets,
+    categories: mergedCategories,
+    transactions: mergedTransactions,
+  };
 }
 
 export async function exportData(data: AppData) {

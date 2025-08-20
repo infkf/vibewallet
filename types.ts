@@ -16,6 +16,7 @@ export type Wallet = {
   name: string;
   currency: string; // e.g., 'USD'
   decimals: number; // e.g., 2
+  symbol?: string; // e.g., '$' - optional for backward compatibility
 };
 
 export type Transaction = {
