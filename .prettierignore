@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+.expo-shared/
+dist/
+build/
+*.log
+.git/
+.vscode/
+.idea/
+*.lock
+package-lock.json
+assets/

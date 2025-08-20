@@ -42,7 +42,7 @@ export default function AddScreen({
 
   const addTransaction = async () => {
     const amt = parseFloat(amount);
-    if (!amt || !categoryId) {
+    if (isNaN(amt) || amt <= 0 || !categoryId) {
       Alert.alert("Missing info", "Enter amount and choose a category.");
       return;
     }
@@ -65,6 +65,7 @@ export default function AddScreen({
     await saveData(next);
     setAmount("");
     setDesc("");
+    setCategoryId(undefined);
   };
 
   return (

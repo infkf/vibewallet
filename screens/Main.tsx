@@ -90,35 +90,44 @@ const Main = () => {
     },
   ]);
 
-  const renderScene = BottomNavigation.SceneMap({
-    add: () => (
-      <AddScreen
-        data={data}
-        setData={setData}
-        currency={currency}
-        selectedWalletId={selectedWalletId}
-      />
-    ),
-    chart: () => (
-      <ChartScreen
-        data={data}
-        currency={currency}
-        rangeStart={rangeStart}
-        rangeEnd={rangeEnd}
-        onRangeChange={handleRangeChange}
-      />
-    ),
-    transactions: () => <TransactionsScreen data={data} currency={currency} />,
-    wallets: () => (
-      <WalletsScreen
-        data={data}
-        setData={setData}
-        selectedWalletId={selectedWalletId}
-        onWalletSelect={setSelectedWalletId}
-      />
-    ),
-    io: () => <ImportExportScreen data={data} setData={setData} />,
-  });
+  const renderScene = ({ route }: { route: { key: string } }) => {
+    switch (route.key) {
+      case "add":
+        return (
+          <AddScreen
+            data={data}
+            setData={setData}
+            currency={currency}
+            selectedWalletId={selectedWalletId}
+          />
+        );
+      case "chart":
+        return (
+          <ChartScreen
+            data={data}
+            currency={currency}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            onRangeChange={handleRangeChange}
+          />
+        );
+      case "transactions":
+        return <TransactionsScreen data={data} currency={currency} />;
+      case "wallets":
+        return (
+          <WalletsScreen
+            data={data}
+            setData={setData}
+            selectedWalletId={selectedWalletId}
+            onWalletSelect={setSelectedWalletId}
+          />
+        );
+      case "io":
+        return <ImportExportScreen data={data} setData={setData} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <BottomNavigation
