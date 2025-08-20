@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Alert, Button, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { AppData, Category, Transaction } from '../types';
-import { formatCurrency, toISODateString, uid } from '../utils';
+import { formatCurrency, toISODateString, uid, stringToColor } from '../utils';
 import { saveData } from '../storage';
 import { Section, LabeledInput, CategorySelector, AddCategoryModal } from '../components';
 
@@ -20,8 +20,8 @@ export function AddScreen({ data, setData, currency }: AddScreenProps) {
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   const [showAddCategory, setShowAddCategory] = useState(false);
 
-  const addCategory = async (name: string) => {
-    const c: Category = { id: uid(), name, kind: type };
+  const addCategory = async (name: string, color: string) => {
+    const c: Category = { id: uid(), name, kind: type, color };
     const next = { ...data, categories: [...data.categories, c] };
     setData(next);
     await saveData(next);
@@ -76,12 +76,17 @@ export function AddScreen({ data, setData, currency }: AddScreenProps) {
         {data.transactions
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(0, 10).map(t => {
-          const cat = data.categories.find(c => c.id === t.categoryId)?.name || '—';
+          const category = data.categories.find(c => c.id === t.categoryId);
+          const catName = category?.name || '—';
+          const catColor = category?.color || stringToColor(catName);
           return (
             <View key={t.id} style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f1f1f1', flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View>
-                <Text style={{ fontWeight: '600' }}>{t.description || cat}</Text>
-                <Text style={{ color: '#666', fontSize: 12 }}>{toISODateString(new Date(t.date))} · {cat}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: catColor }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '600' }}>{t.description || catName}</Text>
+                  <Text style={{ color: '#666', fontSize: 12 }}>{toISODateString(new Date(t.date))} · {catName}</Text>
+                </View>
               </View>
               <Text style={{ fontWeight: '700', color: t.type === 'income' ? '#137333' : '#b00020' }}>{t.type === 'income' ? '+' : '-'}{formatCurrency(t.amount, currency)}</Text>
             </View>

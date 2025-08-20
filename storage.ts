@@ -65,11 +65,27 @@ function mapMoneyTrackerToApp(json: MoneyTrackerJSON): AppData {
   // Categories: map type 0 => income, 1 => expense, 2 => transfer (skip)
   const categories: Category[] = (json.categories || [])
     .filter(c => c.type !== 2)
-    .map(c => ({
-      id: String(c.id),
-      name: String(c.name),
-      kind: c.type === 0 ? 'income' : 'expense',
-    }));
+    .map(c => {
+      let color: string | undefined;
+      try {
+        // Parse the icon field to extract color
+        if (c.icon && typeof c.icon === 'string') {
+          const iconData = JSON.parse(c.icon);
+          if (iconData.type === 'color' && iconData.color) {
+            color = String(iconData.color);
+          }
+        }
+      } catch {
+        // If parsing fails, color will remain undefined
+      }
+      
+      return {
+        id: String(c.id),
+        name: String(c.name),
+        kind: c.type === 0 ? 'income' : 'expense',
+        color,
+      };
+    });
 
   const walletDecimals = new Map(wallets.map(w => [w.id, w.decimals] as const));
   const walletCurrency = new Map(wallets.map(w => [w.id, w.currency] as const));

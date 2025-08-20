@@ -8,6 +8,7 @@ export type Category = {
   id: UUID;
   name: string;
   kind: CategoryKind;
+  color?: string; // hex color like #FF0000
 };
 
 export type Wallet = {

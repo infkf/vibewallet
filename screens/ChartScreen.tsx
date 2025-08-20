@@ -40,7 +40,7 @@ export function ChartScreen({ data, currency, rangeStart, rangeEnd, onRangeChang
     for (const [cid, val] of map.entries()) {
       const cat = data.categories.find(c => c.id === cid);
       if (!cat) continue;
-      items.push({ key: cid, label: cat.name, value: val, color: stringToColor(cat.name) });
+      items.push({ key: cid, label: cat.name, value: val, color: cat.color || stringToColor(cat.name) });
     }
     // sort desc by value
     items.sort((a, b) => b.value - a.value);
