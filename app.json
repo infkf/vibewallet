@@ -1,29 +1,26 @@
 {
   "expo": {
-    "name": "vibewallet",
-    "slug": "vibewallet",
+    "name": "Vibe Wallet",
+    "slug": "vibe-wallet",
     "version": "1.0.0",
-    "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
+      "backgroundColor": "#0b1022"
     },
     "android": {
+      "package": "am.igor.vibewallet",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#0b1022"
+      }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "extra": {
+      "eas": {
+        "projectId": "3f3bde65-acfa-459d-87f4-5ab01d0420b0"
+      }
     }
   }
 }
